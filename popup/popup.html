@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Viewer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <img src="../icons/icon128.png" alt="Markdown Viewer Icon" class="brand-icon">
+        <div class="brand-text">
+          <h1 class="brand-title">Markdown Viewer</h1>
+          <span class="brand-subtitle">Reader & Live Preview</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Settings Content -->
+    <main class="settings-content">
+      <!-- Theme Selection Group -->
+      <section class="setting-group">
+        <div class="setting-label-row">
+          <span class="setting-title">Theme</span>
+        </div>
+        <div class="segmented-control" role="radiogroup" aria-label="Theme selector">
+          <label class="segment-option">
+            <input type="radio" name="theme" value="light">
+            <span class="segment-pill">
+              <svg class="segment-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              Light
+            </span>
+          </label>
+          <label class="segment-option">
+            <input type="radio" name="theme" value="dark">
+            <span class="segment-pill">
+              <svg class="segment-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+              Dark
+            </span>
+          </label>
+          <label class="segment-option">
+            <input type="radio" name="theme" value="auto" checked>
+            <span class="segment-pill">
+              <svg class="segment-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              Auto
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Font Size Slider Group -->
+      <section class="setting-group">
+        <div class="setting-label-row">
+          <label for="fontSize" class="setting-title">Font Size</label>
+          <span id="fontSizeDisplay" class="value-badge">16px</span>
+        </div>
+        <div class="slider-wrapper">
+          <span class="slider-limit">12</span>
+          <div class="range-container">
+            <input type="range" id="fontSize" name="fontSize" min="12" max="20" step="1" value="16" class="range-slider" aria-label="Font size slider">
+          </div>
+          <span class="slider-limit">20</span>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Auto-reload Toggle -->
+      <section class="setting-row">
+        <div class="setting-info">
+          <label for="autoReload" class="setting-title">Auto-reload</label>
+          <span class="setting-desc">Auto refresh on local file changes</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoReload" name="autoReload">
+          <span class="slider-round"></span>
+        </label>
+      </section>
+
+      <!-- Line Numbers Toggle -->
+      <section class="setting-row">
+        <div class="setting-info">
+          <label for="lineNumbers" class="setting-title">Line numbers in code</label>
+          <span class="setting-desc">Display line numbers in code blocks</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="lineNumbers" name="lineNumbers" checked>
+          <span class="slider-round"></span>
+        </label>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span class="status-text">Extension active</span>
+      </div>
+      <span class="version-tag">v1.0.0</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
