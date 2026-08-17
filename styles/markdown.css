@@ -439,10 +439,6 @@ body.md-theme-dark {
 .md-content li > ul,
 .md-content li > ol { margin: 0.4em 0 0.2em; }
 .md-content li > p { margin-bottom: 0.6em; }
-.md-content li input[type="checkbox"] {
-  margin-right: 0.5em;
-  accent-color: var(--md-accent);
-}
 
 /* ── Blockquotes ─────────────────────────────────────────────── */
 
@@ -862,6 +858,83 @@ body.md-theme-dark {
 .md-content .token.variable { color: var(--md-tok-keyword); }
 .md-content .token.bold { font-weight: 700; }
 .md-content .token.italic { font-style: italic; }
+
+/* ── Custom checkboxes ───────────────────────────────────────── */
+
+.md-content li input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0 0.5em 0 0;
+  border: 2px solid var(--md-border);
+  border-radius: 4px;
+  background: var(--md-bg-secondary);
+  vertical-align: -2px;
+  cursor: default;
+  transition: all 0.2s ease;
+}
+
+.md-content li input[type="checkbox"]:checked {
+  background: var(--md-accent-gradient);
+  border-color: transparent;
+  box-shadow: 0 0 8px var(--md-accent-glow);
+  background-size: 100% 100%;
+}
+
+.md-content li input[type="checkbox"]:checked::after {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 9px;
+  margin: 0 auto;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translateY(-1px);
+}
+
+/* ── Inline code border ──────────────────────────────────────── */
+
+.md-content :not(pre) > code {
+  border: 1px solid var(--md-border);
+  box-shadow: 0 0 4px rgba(168, 123, 245, 0.06);
+}
+
+/* ── Lead paragraph (first p after h1) ───────────────────────── */
+
+.md-content h1 + p {
+  font-size: 1.1em;
+  line-height: 1.85;
+  color: var(--md-text-secondary);
+}
+
+/* ── Image captions ──────────────────────────────────────────── */
+
+.md-content .md-img-figure {
+  margin: 0 0 1.3em;
+  text-align: center;
+}
+
+.md-content .md-img-figure img {
+  margin-bottom: 0;
+}
+
+.md-content .md-img-caption {
+  margin-top: 10px;
+  font-size: 0.85em;
+  color: var(--md-text-muted);
+  font-style: italic;
+}
+
+/* ── TOC active highlight ────────────────────────────────────── */
+
+.md-toc-item.md-toc-active > a {
+  color: var(--md-accent);
+  background: var(--md-accent-soft);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--md-accent);
+  border-radius: 0 7px 7px 0;
+}
 
 /* ── Responsive ──────────────────────────────────────────────── */
 
