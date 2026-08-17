@@ -146,8 +146,63 @@
     }
   }
 
+  // mermaid is 3.4MB, so it is only fetched for documents that actually use it.
+  let mermaidModule = null;
+  let mermaidRenderCount = 0;
+
+  function loadMermaid() {
+    if (!mermaidModule) {
+      mermaidModule = import(chrome.runtime.getURL('lib/mermaid.mjs')).then(m => m.default);
+    }
+    return mermaidModule;
+  }
+
+  // Swaps each mermaid fence for a host div up front, so the code block is gone
+  // before Prism/line numbers/copy buttons run. The host keeps the diagram source
+  // as text, which is what stays on screen if rendering fails.
+  function renderMermaid(content) {
+    const blocks = [...content.querySelectorAll('pre > code.language-mermaid')];
+    if (!blocks.length) return;
+
+    const jobs = blocks.map(code => {
+      const host = document.createElement('div');
+      host.className = 'md-mermaid';
+      const source = code.textContent;
+      host.textContent = source;
+      code.parentElement.replaceWith(host);
+      return { host, source };
+    });
+
+    if (typeof chrome === 'undefined' || !chrome.runtime?.getURL) return;
+
+    loadMermaid().then(mermaid => {
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'strict',
+        theme: document.body.classList.contains('md-theme-dark') ? 'dark' : 'default',
+      });
+
+      jobs.forEach(({ host, source }, i) => {
+        const id = `md-mermaid-${mermaidRenderCount++}-${i}`;
+        mermaid.render(id, source)
+          .then(({ svg }) => {
+            host.innerHTML = svg;
+            host.classList.add('md-mermaid-ready');
+          })
+          .catch(err => {
+            host.classList.add('md-mermaid-error');
+            host.textContent = `${source}\n\n${err && err.message ? err.message : 'Mermaid render failed'}`;
+          });
+      });
+    }).catch(() => {
+      jobs.forEach(({ host }) => host.classList.add('md-mermaid-error'));
+    });
+  }
+
   // Re-applied after every render, including the raw-view round trip.
   function enhanceContent(content, settings) {
+    renderMermaid(content);
+
     if (typeof Prism !== 'undefined') {
       content.querySelectorAll('pre code').forEach(block => {
         if (!Array.from(block.classList).some(c => c.startsWith('language-'))) {

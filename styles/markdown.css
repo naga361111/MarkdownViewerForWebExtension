@@ -375,6 +375,38 @@ body.md-theme-dark {
   margin-bottom: 0;
 }
 
+/* ── Mermaid diagrams ────────────────────────────────────────── */
+
+.md-content .md-mermaid {
+  margin-bottom: 1em;
+  padding: 16px;
+  overflow-x: auto;
+  text-align: center;
+  background: var(--md-bg-secondary);
+  border: 1px solid var(--md-border);
+  border-radius: 8px;
+  /* Until the SVG lands this holds the raw diagram source. */
+  font-family: var(--md-font-mono);
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  color: var(--md-text-secondary);
+}
+
+.md-content .md-mermaid-ready {
+  white-space: normal;
+}
+
+.md-content .md-mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.md-content .md-mermaid-error {
+  text-align: left;
+  border-color: var(--md-alert-caution);
+  color: var(--md-alert-caution);
+}
+
 /* ── Alert callouts (GitHub-style) ───────────────────────────── */
 
 .md-content blockquote.md-alert {
