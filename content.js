@@ -17,6 +17,12 @@
   const rawMarkdown = pre.textContent;
   if (!rawMarkdown || rawMarkdown.trim().length === 0) return;
 
+  // YAML front matter (Jekyll/Hugo/Obsidian) is metadata, not content. Left in, marked
+  // renders it as an <hr> plus a bogus heading, which also lands in the TOC.
+  // Raw view and auto-reload keep using rawMarkdown — they need the untouched file.
+  const FRONT_MATTER = /^\uFEFF?---[ \t]*\r?\n(?:[\s\S]*?\r?\n)?(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/;
+  const markdownBody = rawMarkdown.replace(FRONT_MATTER, '');
+
   const DEFAULT_SETTINGS = {
     theme: 'auto',
     fontSize: 16,
@@ -32,13 +38,13 @@
     }
 
     const htmlContent = typeof marked !== 'undefined'
-      ? marked.parse(rawMarkdown)
-      : escapeHtml(rawMarkdown);
+      ? marked.parse(markdownBody)
+      : escapeHtml(markdownBody);
 
     document.body.innerHTML = '';
     document.body.className = '';
 
-    const titleMatch = rawMarkdown.match(/^#\s+(.+)$/m);
+    const titleMatch = markdownBody.match(/^#\s+(.+)$/m);
     const fileName = decodeURIComponent(pathname.split('/').pop());
     document.title = titleMatch ? titleMatch[1].trim() : fileName;
 
@@ -77,8 +83,9 @@
     content.className = 'md-content markdown-body';
     content.innerHTML = htmlContent;
 
-    // buildToc assigns heading ids in place, so snapshot after it (but before
-    // Prism/line numbers run) for the raw-view toggle to restore from.
+    // These two rewrite the document itself, so they run once and land in the
+    // snapshot below. Everything re-applied per render lives in enhanceContent.
+    transformAlerts(content);
     const toc = buildToc(content);
     const renderedHtml = content.innerHTML;
 
@@ -94,18 +101,7 @@
       document.body.classList.add('md-line-numbers');
     }
 
-    if (typeof Prism !== 'undefined') {
-      content.querySelectorAll('pre code').forEach(block => {
-        if (!Array.from(block.classList).some(c => c.startsWith('language-'))) {
-          block.classList.add('language-text');
-        }
-      });
-      Prism.highlightAllUnder(content);
-    }
-
-    if (settings.lineNumbers) {
-      content.querySelectorAll('pre code').forEach(addLineNumbers);
-    }
+    enhanceContent(content, settings);
 
     const tocBtn = document.getElementById('md-toggle-toc');
     if (toc) {
@@ -130,10 +126,7 @@
         tocBtn?.classList.remove('active');
       } else {
         content.innerHTML = renderedHtml;
-        if (typeof Prism !== 'undefined') Prism.highlightAllUnder(content);
-        if (settings.lineNumbers) {
-          content.querySelectorAll('pre code').forEach(addLineNumbers);
-        }
+        enhanceContent(content, settings);
         toggleBtn.classList.remove('active');
       }
     });
@@ -146,6 +139,30 @@
       });
     });
 
+    if (settings.autoReload) {
+      startAutoReload();
+    } else {
+      stopAutoReload();
+    }
+  }
+
+  // Re-applied after every render, including the raw-view round trip.
+  function enhanceContent(content, settings) {
+    if (typeof Prism !== 'undefined') {
+      content.querySelectorAll('pre code').forEach(block => {
+        if (!Array.from(block.classList).some(c => c.startsWith('language-'))) {
+          block.classList.add('language-text');
+        }
+      });
+      Prism.highlightAllUnder(content);
+    }
+
+    if (settings.lineNumbers) {
+      content.querySelectorAll('pre code').forEach(addLineNumbers);
+    }
+
+    addCopyButtons(content);
+
     content.querySelectorAll('a').forEach(a => {
       if (a.hostname !== location.hostname) {
         a.setAttribute('target', '_blank');
@@ -156,12 +173,76 @@
     content.querySelectorAll('input[type="checkbox"]').forEach(cb => {
       cb.setAttribute('disabled', 'disabled');
     });
+  }
 
-    if (settings.autoReload) {
-      startAutoReload();
-    } else {
-      stopAutoReload();
-    }
+  function addCopyButtons(content) {
+    content.querySelectorAll('pre').forEach(pre => {
+      if (pre.classList.contains('md-raw-view')) return;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'md-code-copy';
+      btn.textContent = 'Copy';
+      btn.setAttribute('aria-label', 'Copy code to clipboard');
+
+      btn.addEventListener('click', () => {
+        // Line numbers render via CSS ::before, so textContent is just the code.
+        const code = pre.querySelector('code') || pre;
+        navigator.clipboard.writeText(code.textContent).then(() => {
+          btn.textContent = 'Copied';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 1500);
+        });
+      });
+
+      // The button sits outside <pre> so it stays put while long lines scroll.
+      const wrap = document.createElement('div');
+      wrap.className = 'md-code-wrap';
+      pre.parentNode.insertBefore(wrap, pre);
+      wrap.appendChild(pre);
+      wrap.appendChild(btn);
+    });
+  }
+
+  // GitHub alert callouts: "> [!NOTE]" and friends. marked has no notion of
+  // these, so it leaves the marker as literal text in the blockquote.
+  const ALERTS = {
+    note:      { label: 'Note',      icon: '<path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM7.25 7.25a.75.75 0 011.5 0v3.5a.75.75 0 01-1.5 0v-3.5zM8 4.5a.9.9 0 100 1.8.9.9 0 000-1.8z"/>' },
+    tip:       { label: 'Tip',       icon: '<path d="M8 1.5a4.5 4.5 0 00-2.6 8.17c.3.22.48.56.48.93v.4h4.24v-.4c0-.37.18-.71.48-.93A4.5 4.5 0 008 1.5zM6.3 13.1h3.4a.75.75 0 010 1.5H6.3a.75.75 0 010-1.5z"/>' },
+    important: { label: 'Important', icon: '<path d="M2.5 2.75c0-.14.11-.25.25-.25h10.5c.14 0 .25.11.25.25v7.5c0 .14-.11.25-.25.25H5.5L2.5 13.5V2.75zM7.25 4.5v3.25a.75.75 0 001.5 0V4.5a.75.75 0 00-1.5 0zM8 10.25a.9.9 0 100-1.8.9.9 0 000 1.8z"/>' },
+    warning:   { label: 'Warning',   icon: '<path d="M7.06 2.2a1.1 1.1 0 011.88 0l5.2 9.1c.42.73-.11 1.65-.94 1.65H2.8c-.83 0-1.36-.92-.94-1.65l5.2-9.1zM7.25 5.75V9a.75.75 0 001.5 0V5.75a.75.75 0 00-1.5 0zM8 11.5a.9.9 0 100-1.8.9.9 0 000 1.8z"/>' },
+    caution:   { label: 'Caution',   icon: '<path d="M5.16 1.5h5.68l4.16 4.16v5.68l-4.16 4.16H5.16L1 11.34V5.66L5.16 1.5zM7.25 5v3.5a.75.75 0 001.5 0V5a.75.75 0 00-1.5 0zM8 11.75a.9.9 0 100-1.8.9.9 0 000 1.8z"/>' },
+  };
+
+  function transformAlerts(content) {
+    content.querySelectorAll('blockquote').forEach(quote => {
+      const para = quote.querySelector('p');
+      const marker = para && para.firstChild;
+      if (!marker || marker.nodeType !== Node.TEXT_NODE) return;
+
+      const match = marker.textContent.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*/i);
+      if (!match) return;
+      const type = match[1].toLowerCase();
+
+      // Drop the marker, plus the <br> that `breaks: true` put after it.
+      marker.textContent = marker.textContent.slice(match[0].length);
+      if (!marker.textContent) marker.remove();
+      if (para.firstChild && para.firstChild.nodeName === 'BR') para.firstChild.remove();
+      if (!para.textContent.trim() && !para.firstElementChild) para.remove();
+
+      quote.classList.add('md-alert', `md-alert-${type}`);
+
+      const title = document.createElement('p');
+      title.className = 'md-alert-title';
+      title.innerHTML =
+        `<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true">${ALERTS[type].icon}</svg>` +
+        `<span></span>`;
+      title.querySelector('span').textContent = ALERTS[type].label;
+      quote.prepend(title);
+    });
   }
 
   function slugify(text, used) {
