@@ -56,7 +56,7 @@
     toolbar.className = 'md-toolbar';
     toolbar.innerHTML = `
       <div class="md-toolbar-left">
-        <span class="md-toolbar-icon">M↓</span>
+        <span class="md-toolbar-icon">M</span>
         <span class="md-toolbar-filename">${escapeHtml(fileName)}</span>
       </div>
       <div class="md-toolbar-right">
