@@ -217,6 +217,7 @@
     }
 
     addCopyButtons(content);
+    addLanguageLabels(content);
 
     content.querySelectorAll('a').forEach(a => {
       if (a.hostname !== location.hostname) {
@@ -259,6 +260,21 @@
       pre.parentNode.insertBefore(wrap, pre);
       wrap.appendChild(pre);
       wrap.appendChild(btn);
+    });
+  }
+
+  function addLanguageLabels(content) {
+    content.querySelectorAll('.md-code-wrap pre code[class*="language-"]').forEach(code => {
+      const lang = Array.from(code.classList)
+        .find(c => c.startsWith('language-'))
+        ?.replace('language-', '') || '';
+      if (!lang || lang === 'text' || lang === 'none') return;
+      const wrap = code.closest('.md-code-wrap');
+      if (wrap.querySelector('.md-code-lang')) return;
+      const badge = document.createElement('span');
+      badge.className = 'md-code-lang';
+      badge.textContent = lang;
+      wrap.appendChild(badge);
     });
   }
 

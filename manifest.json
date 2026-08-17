@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Markdown Viewer",
   "description": "브라우저에서 마크다운(.md) 파일을 아름답게 렌더링합니다.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "icons": {
     "128": "icons/icon128.png"
   },
