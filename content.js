@@ -54,6 +54,11 @@
         <span class="md-toolbar-filename">${escapeHtml(fileName)}</span>
       </div>
       <div class="md-toolbar-right">
+        <button id="md-toggle-toc" class="md-toolbar-btn" title="Table of contents">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 4h12M2 8h9M2 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
         <button id="md-toggle-raw" class="md-toolbar-btn" title="Raw view">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M4 4L1 8l3 4M12 4l3 4-3 4M10 2L6 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -72,7 +77,13 @@
     content.className = 'md-content markdown-body';
     content.innerHTML = htmlContent;
 
+    // buildToc assigns heading ids in place, so snapshot after it (but before
+    // Prism/line numbers run) for the raw-view toggle to restore from.
+    const toc = buildToc(content);
+    const renderedHtml = content.innerHTML;
+
     wrapper.appendChild(toolbar);
+    if (toc) wrapper.appendChild(toc);
     wrapper.appendChild(content);
     document.body.appendChild(wrapper);
 
@@ -96,6 +107,16 @@
       content.querySelectorAll('pre code').forEach(addLineNumbers);
     }
 
+    const tocBtn = document.getElementById('md-toggle-toc');
+    if (toc) {
+      tocBtn.addEventListener('click', () => {
+        const open = wrapper.classList.toggle('md-toc-open');
+        tocBtn.classList.toggle('active', open);
+      });
+    } else {
+      tocBtn.remove();
+    }
+
     const toggleBtn = document.getElementById('md-toggle-raw');
     let showingRaw = false;
 
@@ -104,8 +125,11 @@
       if (showingRaw) {
         content.innerHTML = `<pre class="md-raw-view"><code>${escapeHtml(rawMarkdown)}</code></pre>`;
         toggleBtn.classList.add('active');
+        // Headings are gone in raw view, so the TOC links have nothing to hit.
+        wrapper.classList.remove('md-toc-open');
+        tocBtn?.classList.remove('active');
       } else {
-        content.innerHTML = htmlContent;
+        content.innerHTML = renderedHtml;
         if (typeof Prism !== 'undefined') Prism.highlightAllUnder(content);
         if (settings.lineNumbers) {
           content.querySelectorAll('pre code').forEach(addLineNumbers);
@@ -138,6 +162,52 @@
     } else {
       stopAutoReload();
     }
+  }
+
+  function slugify(text, used) {
+    const base = text.trim().toLowerCase()
+      .replace(/[^\p{L}\p{N}\s-]/gu, '')   // drop emoji/punctuation
+      .replace(/\s+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'section';
+    let slug = base;
+    for (let i = 1; used.has(slug); i++) slug = `${base}-${i}`;
+    used.add(slug);
+    return slug;
+  }
+
+  function buildToc(content) {
+    const headings = content.querySelectorAll('h1, h2, h3, h4');
+    if (headings.length < 2) return null;
+
+    const used = new Set();
+    const list = document.createElement('ul');
+    list.className = 'md-toc-list';
+
+    headings.forEach(h => {
+      if (h.id) used.add(h.id);
+      else h.id = slugify(h.textContent, used);
+
+      const link = document.createElement('a');
+      link.href = `#${h.id}`;
+      link.textContent = h.textContent;
+
+      const item = document.createElement('li');
+      item.className = `md-toc-item md-toc-h${h.tagName[1]}`;
+      item.appendChild(link);
+      list.appendChild(item);
+    });
+
+    const nav = document.createElement('nav');
+    nav.className = 'md-toc';
+    nav.setAttribute('aria-label', 'Table of contents');
+
+    const title = document.createElement('div');
+    title.className = 'md-toc-title';
+    title.textContent = 'Contents';
+
+    nav.appendChild(title);
+    nav.appendChild(list);
+    return nav;
   }
 
   function escapeHtml(str) {
