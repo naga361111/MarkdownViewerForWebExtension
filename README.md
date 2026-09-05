@@ -8,55 +8,55 @@ A lightweight, distraction-free browser extension (Manifest V3) that renders loc
 
 ---
 
-## ✨ Features
+## Features
 
-- 📖 **Clean Editorial Typography**
+- **Clean Editorial Typography**
   - Carefully tuned typography designed for comfortable long-form reading and technical documentation.
   - Warm, eye-friendly **Light theme** and deep **Dark theme**, with automatic switching based on system preferences (`prefers-color-scheme`).
 
-- 📊 **Mermaid Diagrams On-Demand**
+- **Mermaid Diagrams On-Demand**
   - Seamlessly renders Mermaid code fences (`flowchart`, `sequenceDiagram`, `classDiagram`, `stateDiagram`, etc.) into responsive vector SVGs.
   - **Dynamic Lazy Loading**: Mermaid library is only loaded when diagrams are present, ensuring zero memory and performance overhead for plain documents.
 
-- 📑 **Interactive Table of Contents (TOC)**
+- **Interactive Table of Contents (TOC)**
   - Floating, collapsible navigation drawer.
   - Dynamic **scrollspy** that highlights the active section in real-time as you scroll.
   - Smooth anchor link scrolling.
 
-- 💻 **Syntax Highlighting & Code Blocks**
+- **Syntax Highlighting & Code Blocks**
   - High-performance syntax highlighting powered by Prism.js.
   - Automatic language badge tags.
   - One-click **Copy Code** button that copies clean code without line numbers.
   - Toggleable line numbers.
 
-- 🔔 **GitHub-Style Alert Callouts**
+- **GitHub-Style Alert Callouts**
   - Native rendering of GitHub markdown callouts: `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, and `[!CAUTION]` with distinct icons and themed borders.
 
-- 🔄 **Live Local Auto-Reload**
+- **Live Local Auto-Reload**
   - Automatically detects changes to local `file://` documents and refreshes the preview in real-time—perfect for live editing with your favorite text editor (VS Code, Neovim, Obsidian, etc.).
 
-- 🧰 **Sticky Header Toolbar**
+- **Sticky Header Toolbar**
   - **File Title & Name**: Displays document heading and filename.
   - **TOC Toggle**: Easily open and close the outline sidebar.
   - **Raw View Toggle (`</>`)**: Switch between rendered HTML and untouched raw Markdown source instantly.
   - **Copy HTML**: Copy the rendered HTML markup to clipboard with a single click.
 
-- ⚙️ **Real-Time Settings Popup**
+- **Real-Time Settings Popup**
   - Adjust font size dynamically from `12px` to `20px`.
   - Switch themes (`Auto`, `Light`, `Dark`) on the fly.
   - Toggle line numbers and auto-reload per user preference.
   - Settings persist across browser sessions via `chrome.storage.sync`.
 
-- 🧹 **Front Matter Sanitization**
+- **Front Matter Sanitization**
   - Cleanly strips YAML front matter (`--- ... ---`) from the rendered view while preserving it in raw view and auto-reload checks.
 
-- 🖼️ **Image Captions & Custom Checkboxes**
+- **Image Captions & Custom Checkboxes**
   - Automatically wraps images with `alt` text in `<figure>` and `<figcaption>`.
   - Clean, read-only custom styled task checkboxes.
 
 ---
 
-## 📂 Supported Extensions
+## Supported Extensions
 
 Markdown Viewer automatically activates on any URL ending with:
 - `.md`
@@ -68,7 +68,7 @@ Markdown Viewer automatically activates on any URL ending with:
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Chromium-based Browsers (Chrome, Edge, Brave, Opera, Vivaldi)
 
@@ -86,13 +86,13 @@ Markdown Viewer automatically activates on any URL ending with:
 
 4. Click **Load unpacked** and select the folder where this repository was cloned (`MarkdownViewer`).
 
-5. ⚠️ **Enable Local File Access (Crucial for `file://` URLs)**:
+5. **Enable Local File Access (Crucial for `file://` URLs)**:
    - On the **Markdown Viewer** card, click **Details**.
    - Scroll down and toggle ON **"Allow access to file URLs"** (*파일 URL에 대한 액세스 허용*).
 
 ---
 
-## 💡 How to Use
+## How to Use
 
 1. **Open any local Markdown file**:
    - Drag and drop a `.md` file directly into your browser, or open a URL like:
@@ -108,7 +108,7 @@ Markdown Viewer automatically activates on any URL ending with:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 MarkdownViewer/
@@ -134,7 +134,7 @@ MarkdownViewer/
 
 ---
 
-## 🔒 Permissions
+## Permissions
 
 | Permission | Purpose |
 |------------|---------|
@@ -143,7 +143,7 @@ MarkdownViewer/
 
 ---
 
-## 🛠️ Built With
+## Built With
 
 - [Marked](https://marked.js.org/) — High-speed GFM Markdown parser
 - [Prism](https://prismjs.com/) — Lightweight syntax highlighter
@@ -152,6 +152,6 @@ MarkdownViewer/
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the [MIT License](LICENSE).
