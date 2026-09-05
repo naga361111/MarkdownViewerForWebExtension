@@ -56,7 +56,7 @@
     toolbar.className = 'md-toolbar';
     toolbar.innerHTML = `
       <div class="md-toolbar-left">
-        <span class="md-toolbar-icon">M↓</span>
+        <span class="md-toolbar-icon">M</span>
         <span class="md-toolbar-filename">${escapeHtml(fileName)}</span>
       </div>
       <div class="md-toolbar-right">
@@ -103,12 +103,17 @@
 
     enhanceContent(content, settings);
 
+    // smooth scroll for anchor links
+    wrapper.style.scrollBehavior = 'smooth';
+    document.documentElement.style.scrollBehavior = 'smooth';
+
     const tocBtn = document.getElementById('md-toggle-toc');
     if (toc) {
       tocBtn.addEventListener('click', () => {
         const open = wrapper.classList.toggle('md-toc-open');
         tocBtn.classList.toggle('active', open);
       });
+      setupTocHighlight(content, toc);
     } else {
       tocBtn.remove();
     }
@@ -218,6 +223,7 @@
 
     addCopyButtons(content);
     addLanguageLabels(content);
+    addImageCaptions(content);
 
     content.querySelectorAll('a').forEach(a => {
       if (a.hostname !== location.hostname) {
@@ -276,6 +282,51 @@
       badge.textContent = lang;
       wrap.appendChild(badge);
     });
+  }
+
+  function addImageCaptions(content) {
+    content.querySelectorAll('img[alt]').forEach(img => {
+      const alt = img.getAttribute('alt');
+      if (!alt || alt === 'image' || img.closest('.md-img-figure')) return;
+      const figure = document.createElement('figure');
+      figure.className = 'md-img-figure';
+      const caption = document.createElement('figcaption');
+      caption.className = 'md-img-caption';
+      caption.textContent = alt;
+      img.parentNode.insertBefore(figure, img);
+      figure.appendChild(img);
+      figure.appendChild(caption);
+    });
+  }
+
+  function setupTocHighlight(content, toc) {
+    const headings = [...content.querySelectorAll('h1[id], h2[id], h3[id], h4[id]')];
+    const links = [...toc.querySelectorAll('.md-toc-item a')];
+    if (!headings.length) return;
+
+    const offset = parseInt(getComputedStyle(document.documentElement)
+      .getPropertyValue('--md-toolbar-height')) + 32 || 88;
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        let active = headings[0];
+        for (const h of headings) {
+          if (h.getBoundingClientRect().top <= offset) active = h;
+          else break;
+        }
+        links.forEach(a => {
+          const isActive = a.getAttribute('href') === `#${active.id}`;
+          a.parentElement.classList.toggle('md-toc-active', isActive);
+        });
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
   }
 
   // GitHub alert callouts: "> [!NOTE]" and friends. marked has no notion of

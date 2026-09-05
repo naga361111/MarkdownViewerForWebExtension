@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "3848", "--no-clipboard"],
+      "port": 3848,
+      "url": "http://localhost:3848"
+    }
+  ]
+}
